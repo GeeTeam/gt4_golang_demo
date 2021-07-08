@@ -56,25 +56,34 @@ func login(writer http.ResponseWriter, request *http.Request) {
 	form_data["pass_token"] = []string{pass_token}
 	form_data["gen_time"] = []string{gen_time}
 	form_data["sign_token"] = []string{sign_token}
-	// 发起post
+
+	// 发起post， geetest响应json数据如：{"result": "success", "reason": "", "captcha_args": {}}
 	resp, err := http.PostForm(URL, form_data)
-	if err != nil {
-		fmt.Println("接口错误: ")
+	if err != nil || resp.StatusCode != 200 {
+		fmt.Println("接口服务异常: ")
 		fmt.Println(err)
-		return
+		writer.Write([]byte("geetest server error"))
 	}
 
+	defer resp.Body.Close()
+
 	res_json, _ := ioutil.ReadAll(resp.Body)
+	var res_map map[string]interface{}
 
 	// 根据极验返回的用户验证状态, 网站主进行自己的业务逻辑
-	var geetest_res map[string]interface{}
-	if err := json.Unmarshal([]byte(res_json), &geetest_res); err == nil {
-		result := geetest_res["result"]
+	if err := json.Unmarshal(res_json, &res_map); err == nil {
+		if err != nil {
+			fmt.Println("Json数据解析错误")
+			writer.Write([]byte("fail"))
+		}
+		result := res_map["result"]
 		if result == "success" {
 			fmt.Println("验证通过")
 			writer.Write([]byte("success"))
 		} else {
-			fmt.Println("验证失败")
+			reason := res_map["reason"]
+			fmt.Print("验证失败: ")
+			fmt.Print(reason)
 			writer.Write([]byte("fail"))
 		}
 	}
