@@ -32,7 +32,7 @@ func index(response http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// login post请求处理
+// login
 func login(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" {
 		writer.WriteHeader(405)
