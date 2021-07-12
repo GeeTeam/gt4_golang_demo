@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // geetest 公钥
@@ -57,20 +58,22 @@ func login(writer http.ResponseWriter, request *http.Request) {
 	form_data["gen_time"] = []string{gen_time}
 	form_data["sign_token"] = []string{sign_token}
 
-	// 发起post， geetest响应json数据如：{"result": "success", "reason": "", "captcha_args": {}}
-	resp, err := http.PostForm(URL, form_data)
+	// 发起post请求
+	// 设置5s超时
+	cli := http.Client{Timeout: time.Second * 5}
+	resp, err := cli.PostForm(URL, form_data)
 	if err != nil || resp.StatusCode != 200 {
-		fmt.Println("接口服务异常: ")
+		// 当请求发生异常时，应放行通过，以免阻塞业务。
+		fmt.Println("服务接口异常: ")
 		fmt.Println(err)
 		writer.Write([]byte("geetest server error"))
+		return
 	}
-
-	defer resp.Body.Close()
 
 	res_json, _ := ioutil.ReadAll(resp.Body)
 	var res_map map[string]interface{}
-
 	// 根据极验返回的用户验证状态, 网站主进行自己的业务逻辑
+	// 响应json数据如：{"result": "success", "reason": "", "captcha_args": {}}
 	if err := json.Unmarshal(res_json, &res_map); err == nil {
 		if err != nil {
 			fmt.Println("Json数据解析错误")
