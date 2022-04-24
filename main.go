@@ -89,10 +89,6 @@ func login(writer http.ResponseWriter, request *http.Request) {
 	// 响应json数据如：{"result": "success", "reason": "", "captcha_args": {}}
 	// respond to json data, such as {"result": "success", "reason": "", "captcha_args": {}}
 	if err := json.Unmarshal(res_json, &res_map); err == nil {
-		if err != nil {
-			fmt.Println("Json数据解析错误")
-			writer.Write([]byte("fail"))
-		}
 		result := res_map["result"]
 		if result == "success" {
 			fmt.Println("验证通过")
