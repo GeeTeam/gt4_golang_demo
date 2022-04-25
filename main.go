@@ -88,18 +88,24 @@ func login(writer http.ResponseWriter, request *http.Request) {
 	// taking the user authentication status returned from geetest into consideration, the website owner follows his own business logic
 	// 响应json数据如：{"result": "success", "reason": "", "captcha_args": {}}
 	// respond to json data, such as {"result": "success", "reason": "", "captcha_args": {}}
-	if err := json.Unmarshal(res_json, &res_map); err == nil {
-		result := res_map["result"]
-		if result == "success" {
-			fmt.Println("验证通过")
-			writer.Write([]byte("success"))
-		} else {
-			reason := res_map["reason"]
-			fmt.Print("验证失败: ")
-			fmt.Print(reason)
-			writer.Write([]byte("fail"))
-		}
+
+	if err = json.Unmarshal(res_json, &res_map); err != nil {
+		fmt.Println("Json数据解析错误")
+		writer.Write([]byte("fail"))
+		return
 	}
+
+	result := res_map["result"]
+	if result == "success" {
+		fmt.Println("验证通过")
+		writer.Write([]byte("success"))
+	} else {
+		reason := res_map["reason"]
+		fmt.Print("验证失败: ")
+		fmt.Print(reason)
+		writer.Write([]byte("fail"))
+	}
+
 }
 
 // hmac-sha256 加密：  CAPTCHA_KEY,lot_number
