@@ -78,7 +78,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 		// when geetest server interface exceptions occur, the request should pass in order not to interrupt the website's business
 		fmt.Println("服务接口异常: ")
 		fmt.Println(err)
-		writer.Write([]byte("geetest server error"))
+		writer.Write([]byte("success"))
 		return
 	}
 
@@ -91,7 +91,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 
 	if err = json.Unmarshal(res_json, &res_map); err != nil {
 		fmt.Println("Json数据解析错误")
-		writer.Write([]byte("fail"))
+		writer.Write([]byte("success"))
 		return
 	}
 
